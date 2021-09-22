@@ -1,4 +1,7 @@
 # Changelog for OrganizedResearchTab
 
+1.0.1.0 - Fixed an iterator
+
+
 1.0.0.0 - First publish
 

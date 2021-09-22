@@ -98,8 +98,9 @@ namespace OrganizedResearch
 
             for (var k = 0; k < _Layers.Count - 1; k++)
             {
-                foreach (var item2 in _Layers[k])
+                for (var index = 0; index < _Layers[k].Count; index++)
                 {
+                    var item2 = _Layers[k][index];
                     ResearchProjectDef researchProjectDef2 = null;
                     for (var l = 0; l < (item2.requiredByThis?.Count ?? 0); l++)
                     {
