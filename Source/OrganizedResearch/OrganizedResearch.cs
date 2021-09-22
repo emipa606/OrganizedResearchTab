@@ -148,8 +148,11 @@ namespace OrganizedResearch
 
         protected void EnforceTopologicalOrdering(List<ResearchProjectDef> topologicalOrder)
         {
-            foreach (var item in topologicalOrder)
+            // Collection gets modified
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (var index = 0; index < topologicalOrder.Count; index++)
             {
+                var item = topologicalOrder[index];
                 IEnumerable<ResearchProjectDef> prerequisites = item.prerequisites;
                 foreach (var item2 in prerequisites ?? Enumerable.Empty<ResearchProjectDef>())
                 {
