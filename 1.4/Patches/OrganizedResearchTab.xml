@@ -6,4 +6,15 @@
       <tabWindowClass>OrganizedResearch.OrganizedResearch</tabWindowClass>
     </value>
   </Operation>
+  
+  <Operation Class="PatchOperationReplace">
+	<xpath>/Defs/ResearchProjectDef/tab</xpath>
+	<value>
+		<tab>Main</tab>
+	</value>
+  </Operation>
+  
+  <Operation Class="PatchOperationRemove">
+	<xpath>/Defs/ResearchTabDef[defName!="Main"]</xpath>
+  </Operation>
 </Patch>
