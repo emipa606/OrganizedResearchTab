@@ -38,7 +38,7 @@ public class OrganizedResearch : MainTabWindow_Research
                 stopwatch.Start();
                 organizeResearchTab(group.ToList());
                 stopwatch.Stop();
-                Log.Message($"{stopwatch.ElapsedMilliseconds}ms organizing Research Tab ${group.Key}.");
+                Log.Message($"{stopwatch.ElapsedMilliseconds}ms organizing Research Tab {group.Key}.");
             }
             catch (Exception ex)
             {
