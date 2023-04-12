@@ -1,5 +1,4 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -28,9 +27,9 @@ public class OrganizedResearch : MainTabWindow_Research
         }
 
         var topologicalOrder = DefDatabase<ResearchProjectDef>.AllDefsListForReading.ListFullCopy();
-        IEnumerable<IGrouping<ResearchTabDef, ResearchProjectDef>> groups = topologicalOrder.GroupBy(res => res.tab, res => res);
+        var groups = topologicalOrder.GroupBy(res => res.tab, res => res);
 
-        foreach (IGrouping<ResearchTabDef, ResearchProjectDef> group in groups)
+        foreach (var group in groups)
         {
             try
             {
@@ -56,7 +55,7 @@ public class OrganizedResearch : MainTabWindow_Research
         EnforceTopologicalOrdering(topologicalOrder);
         var list = CoffmanGrahamOrdering(topologicalOrder);
         var num = 0;
-        _Layers = new List<List<ResearchProjectDef>> { new List<ResearchProjectDef>(9) };
+        _Layers = new List<List<ResearchProjectDef>> { new List<ResearchProjectDef>(maxWidth) };
         while (list.Count > 0)
         {
             var researchProjectDef = list.Last();
@@ -70,10 +69,10 @@ public class OrganizedResearch : MainTabWindow_Research
                 }
             }
 
-            if (_Layers[num].Count >= 6 || layersContainsItem)
+            if (_Layers[num].Count >= maxOriginalWidth || layersContainsItem)
             {
                 num++;
-                _Layers.Add(new List<ResearchProjectDef>(9));
+                _Layers.Add(new List<ResearchProjectDef>(maxWidth));
             }
 
             _Layers[num].Add(researchProjectDef);
@@ -91,7 +90,7 @@ public class OrganizedResearch : MainTabWindow_Research
             for (var j = 0; j < _Layers[i].Count; j++)
             {
                 if (_Layers[i][j].prerequisites != null || _Layers[i][j].requiredByThis != null ||
-                    _Layers[i - 1].Count >= 9)
+                    _Layers[i - 1].Count >= maxWidth)
                 {
                     continue;
                 }
@@ -113,7 +112,7 @@ public class OrganizedResearch : MainTabWindow_Research
                     for (var m = k + 2; m < _Layers.Count; m++)
                     {
                         if (!_Layers[m].Contains(item2.requiredByThis?[l]) ||
-                            _Layers[k + 1].Count >= 9 && researchProjectDef2 == null)
+                            _Layers[k + 1].Count >= maxWidth && researchProjectDef2 == null)
                         {
                             continue;
                         }
@@ -145,10 +144,10 @@ public class OrganizedResearch : MainTabWindow_Research
             {
                 item3.researchViewX = num2;
                 item3.researchViewY = num3 + (0.315f * (n % 2));
-                num3 += 0.63f;
+                num3 += yStep;
             }
 
-            num2 += 1f;
+            num2 += xStep;
         }
     }
 

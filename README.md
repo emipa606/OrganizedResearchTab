@@ -46,3 +46,4 @@ More details in the https://ludeon.com/forums/index.php?topic=31083.0]original f
 
 
 
+https://steamcommunity.com/sharedfiles/filedetails/changelog/2606510510]Last updated 2023-04-12
