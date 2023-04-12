@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -21,27 +22,32 @@ public class OrganizedResearch : MainTabWindow_Research
 
     public OrganizedResearch()
     {
-        var stopwatch = new Stopwatch();
         if (_Layers != null)
         {
             return;
         }
 
-        try
+        var topologicalOrder = DefDatabase<ResearchProjectDef>.AllDefsListForReading.ListFullCopy();
+        IEnumerable<IGrouping<ResearchTabDef, ResearchProjectDef>> groups = topologicalOrder.GroupBy(res => res.tab, res => res);
+
+        foreach (IGrouping<ResearchTabDef, ResearchProjectDef> group in groups)
         {
-            stopwatch.Start();
-            var topologicalOrder = DefDatabase<ResearchProjectDef>.AllDefsListForReading.ListFullCopy();
-            organizeResearchTab(topologicalOrder);
-            stopwatch.Stop();
-            Log.Message($"{stopwatch.ElapsedMilliseconds}ms organizing Research Tab.");
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"OrganizedResearch: unidentified error. {ex}");
-        }
-        finally
-        {
-            ResearchProjectDef.GenerateNonOverlappingCoordinates();
+            try
+            {
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                organizeResearchTab(group.ToList());
+                stopwatch.Stop();
+                Log.Message($"{stopwatch.ElapsedMilliseconds}ms organizing Research Tab {group.Key}.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"OrganizedResearch: unidentified error. {ex}");
+            }
+            finally
+            {
+                ResearchProjectDef.GenerateNonOverlappingCoordinates();
+            }
         }
     }
 
