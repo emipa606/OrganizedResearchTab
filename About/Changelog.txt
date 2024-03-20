@@ -1,5 +1,8 @@
 # Changelog for OrganizedResearchTab
 
+1.5.0 - Mod updated for 1.5 and passed autotests
+
+
 1.4.2 - Organizes each tab instead of the whole tree, thanks zenlor!
 
 

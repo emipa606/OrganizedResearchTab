@@ -55,7 +55,7 @@ public class OrganizedResearch : MainTabWindow_Research
         EnforceTopologicalOrdering(topologicalOrder);
         var list = CoffmanGrahamOrdering(topologicalOrder);
         var num = 0;
-        _Layers = new List<List<ResearchProjectDef>> { new List<ResearchProjectDef>(maxWidth) };
+        _Layers = [new List<ResearchProjectDef>(maxWidth)];
         while (list.Count > 0)
         {
             var researchProjectDef = list.Last();
@@ -121,7 +121,7 @@ public class OrganizedResearch : MainTabWindow_Research
                         {
                             var researchProjectDef3 = new ResearchProjectDef
                             {
-                                requiredByThis = new List<ResearchProjectDef>(),
+                                requiredByThis = [],
                                 defName = $"d{item2.defName}"
                             };
                             _Layers[k + 1].Insert(0, researchProjectDef3);
@@ -170,7 +170,7 @@ public class OrganizedResearch : MainTabWindow_Research
 
                 if (item2.requiredByThis == null)
                 {
-                    item2.requiredByThis = new List<ResearchProjectDef>();
+                    item2.requiredByThis = [];
                 }
 
                 item2.requiredByThis.Add(item);
@@ -310,7 +310,7 @@ public class OrganizedResearch : MainTabWindow_Research
                     array[j] = MedianValue(Order[i][j], Order[i - 1], true);
                 }
 
-                SortLayer(Order[i], new List<float>(array));
+                SortLayer(Order[i], [..array]);
             }
 
             return;
@@ -324,7 +324,7 @@ public class OrganizedResearch : MainTabWindow_Research
                 array2[k] = MedianValue(Order[num][k], Order[num + 1], false);
             }
 
-            SortLayer(Order[num], new List<float>(array2));
+            SortLayer(Order[num], [..array2]);
         }
     }
 
