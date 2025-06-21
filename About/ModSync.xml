@@ -2,7 +2,7 @@
 <ModSyncNinjaData>
   <ID>4329872a-dcc0-46d1-ab7b-2e01af79dc44</ID>
   <ModName>Organized Research Tab (Continued)</ModName>
-  <Version>1.5.0</Version>
+  <Version>1.6.0</Version>
   <SaveBreaking>False</SaveBreaking>
   <Host name="Github">
     <Owner>emipa606</Owner>
@@ -12,3 +12,4 @@
     <Branch>master</Branch>
   </Host>
 </ModSyncNinjaData>
+

@@ -9,19 +9,19 @@ namespace OrganizedResearch;
 
 public class OrganizedResearch : MainTabWindow_Research
 {
-    protected const int maxWidth = 9;
+    private const int MaxWidth = 9;
 
-    protected const int maxOriginalWidth = 6;
+    private const int MaxOriginalWidth = 6;
 
-    protected const float yStep = 0.63f;
+    private const float YStep = 0.63f;
 
-    protected const float xStep = 1f;
+    private const float XStep = 1f;
 
-    private static List<List<ResearchProjectDef>> _Layers;
+    private static List<List<ResearchProjectDef>> layers;
 
     public OrganizedResearch()
     {
-        if (_Layers != null)
+        if (layers != null)
         {
             return;
         }
@@ -50,69 +50,69 @@ public class OrganizedResearch : MainTabWindow_Research
         }
     }
 
-    protected void organizeResearchTab(List<ResearchProjectDef> topologicalOrder)
+    private void organizeResearchTab(List<ResearchProjectDef> topologicalOrder)
     {
-        EnforceTopologicalOrdering(topologicalOrder);
-        var list = CoffmanGrahamOrdering(topologicalOrder);
+        enforceTopologicalOrdering(topologicalOrder);
+        var list = coffmanGrahamOrdering(topologicalOrder);
         var num = 0;
-        _Layers = [new List<ResearchProjectDef>(maxWidth)];
+        layers = [new List<ResearchProjectDef>(MaxWidth)];
         while (list.Count > 0)
         {
             var researchProjectDef = list.Last();
             var layersContainsItem = false;
             IEnumerable<ResearchProjectDef> requiredByThis = researchProjectDef.requiredByThis;
-            foreach (var item in requiredByThis ?? Enumerable.Empty<ResearchProjectDef>())
+            foreach (var item in requiredByThis ?? [])
             {
-                if (_Layers[num].Contains(item))
+                if (layers[num].Contains(item))
                 {
                     layersContainsItem = true;
                 }
             }
 
-            if (_Layers[num].Count >= maxOriginalWidth || layersContainsItem)
+            if (layers[num].Count >= MaxOriginalWidth || layersContainsItem)
             {
                 num++;
-                _Layers.Add(new List<ResearchProjectDef>(maxWidth));
+                layers.Add(new List<ResearchProjectDef>(MaxWidth));
             }
 
-            _Layers[num].Add(researchProjectDef);
+            layers[num].Add(researchProjectDef);
             list.RemoveLast();
         }
 
-        foreach (var researchProjectDefs in _Layers)
+        foreach (var researchProjectDefs in layers)
         {
             researchProjectDefs.Reverse();
         }
 
-        _Layers.Reverse();
-        for (var i = 1; i < _Layers.Count; i++)
+        layers.Reverse();
+        for (var i = 1; i < layers.Count; i++)
         {
-            for (var j = 0; j < _Layers[i].Count; j++)
+            for (var j = 0; j < layers[i].Count; j++)
             {
-                if (_Layers[i][j].prerequisites != null || _Layers[i][j].requiredByThis != null ||
-                    _Layers[i - 1].Count >= maxWidth)
+                if (layers[i][j].prerequisites != null || layers[i][j].requiredByThis != null ||
+                    layers[i - 1].Count >= MaxWidth)
                 {
                     continue;
                 }
 
-                _Layers[i - 1].Add(_Layers[i][j]);
-                _Layers[i].Remove(_Layers[i][j]);
+                layers[i - 1].Add(layers[i][j]);
+                layers[i].Remove(layers[i][j]);
                 j--;
             }
         }
 
-        for (var k = 0; k < _Layers.Count - 1; k++)
+        for (var k = 0; k < layers.Count - 1; k++)
         {
-            for (var index = 0; index < _Layers[k].Count; index++)
+            for (var index = 0; index < layers[k].Count; index++)
             {
-                var item2 = _Layers[k][index];
+                var item2 = layers[k][index];
                 ResearchProjectDef researchProjectDef2 = null;
                 for (var l = 0; l < (item2.requiredByThis?.Count ?? 0); l++)
                 {
-                    for (var m = k + 2; m < _Layers.Count; m++)
+                    for (var m = k + 2; m < layers.Count; m++)
                     {
-                        if (!_Layers[m].Contains(item2.requiredByThis?[l]) ||
-                            _Layers[k + 1].Count >= maxWidth && researchProjectDef2 == null)
+                        if (!layers[m].Contains(item2.requiredByThis?[l]) ||
+                            layers[k + 1].Count >= MaxWidth && researchProjectDef2 == null)
                         {
                             continue;
                         }
@@ -124,7 +124,7 @@ public class OrganizedResearch : MainTabWindow_Research
                                 requiredByThis = [],
                                 defName = $"d{item2.defName}"
                             };
-                            _Layers[k + 1].Insert(0, researchProjectDef3);
+                            layers[k + 1].Insert(0, researchProjectDef3);
                             researchProjectDef2 = researchProjectDef3;
                         }
 
@@ -135,23 +135,23 @@ public class OrganizedResearch : MainTabWindow_Research
             }
         }
 
-        _Layers = VertexOrderingWithinLayers(_Layers);
+        layers = vertexOrderingWithinLayers(layers);
         var num2 = 0f;
-        for (var n = 0; n < _Layers.Count; n++)
+        for (var n = 0; n < layers.Count; n++)
         {
             var num3 = 0f;
-            foreach (var item3 in _Layers[n])
+            foreach (var item3 in layers[n])
             {
                 item3.researchViewX = num2;
                 item3.researchViewY = num3 + (0.315f * (n % 2));
-                num3 += yStep;
+                num3 += YStep;
             }
 
-            num2 += xStep;
+            num2 += XStep;
         }
     }
 
-    protected void EnforceTopologicalOrdering(List<ResearchProjectDef> topologicalOrder)
+    private static void enforceTopologicalOrdering(List<ResearchProjectDef> topologicalOrder)
     {
         // Collection gets modified
         // ReSharper disable once ForCanBeConvertedToForeach
@@ -159,26 +159,23 @@ public class OrganizedResearch : MainTabWindow_Research
         {
             var item = topologicalOrder[index];
             IEnumerable<ResearchProjectDef> prerequisites = item.prerequisites;
-            foreach (var item2 in prerequisites ?? Enumerable.Empty<ResearchProjectDef>())
+            foreach (var item2 in prerequisites ?? [])
             {
                 var num = topologicalOrder.IndexOf(item2);
                 var num2 = topologicalOrder.IndexOf(item);
                 if (num > num2)
                 {
-                    SwapInList(topologicalOrder, num, num2);
+                    swapInList(topologicalOrder, num, num2);
                 }
 
-                if (item2.requiredByThis == null)
-                {
-                    item2.requiredByThis = [];
-                }
+                item2.requiredByThis ??= [];
 
                 item2.requiredByThis.Add(item);
             }
         }
     }
 
-    protected List<ResearchProjectDef> CoffmanGrahamOrdering(List<ResearchProjectDef> topologicalOrder)
+    private static List<ResearchProjectDef> coffmanGrahamOrdering(List<ResearchProjectDef> topologicalOrder)
     {
         var list = new List<ResearchProjectDef>(topologicalOrder.Count);
         while (topologicalOrder.Count > 0)
@@ -271,23 +268,23 @@ public class OrganizedResearch : MainTabWindow_Research
         return list;
     }
 
-    protected List<List<ResearchProjectDef>> VertexOrderingWithinLayers(List<List<ResearchProjectDef>> order)
+    private List<List<ResearchProjectDef>> vertexOrderingWithinLayers(List<List<ResearchProjectDef>> order)
     {
-        var list = SaveOrder(order);
+        var list = saveOrder(order);
         for (var i = 0; i < 50; i++)
         {
-            WeightedMedian(order, i);
-            Transpose(order);
-            if (CountTotalCrossings(order) < CountTotalCrossings(list))
+            weightedMedian(order, i);
+            transpose(order);
+            if (countTotalCrossings(order) < countTotalCrossings(list))
             {
-                list = SaveOrder(order);
+                list = saveOrder(order);
             }
         }
 
         return list;
     }
 
-    protected List<List<ResearchProjectDef>> SaveOrder(List<List<ResearchProjectDef>> order)
+    private static List<List<ResearchProjectDef>> saveOrder(List<List<ResearchProjectDef>> order)
     {
         var list = order.ListFullCopy();
         for (var i = 0; i < list.Count; i++)
@@ -298,41 +295,41 @@ public class OrganizedResearch : MainTabWindow_Research
         return list;
     }
 
-    protected void WeightedMedian(List<List<ResearchProjectDef>> Order, int iteration)
+    private void weightedMedian(List<List<ResearchProjectDef>> order, int iteration)
     {
         if (iteration % 2 == 0)
         {
-            for (var i = 1; i < Order.Count; i++)
+            for (var i = 1; i < order.Count; i++)
             {
-                var array = new float[Order[i].Count];
-                for (var j = 0; j < Order[i].Count; j++)
+                var array = new float[order[i].Count];
+                for (var j = 0; j < order[i].Count; j++)
                 {
-                    array[j] = MedianValue(Order[i][j], Order[i - 1], true);
+                    array[j] = medianValue(order[i][j], order[i - 1], true);
                 }
 
-                SortLayer(Order[i], [..array]);
+                sortLayer(order[i], [..array]);
             }
 
             return;
         }
 
-        for (var num = Order.Count - 2; num >= 0; num--)
+        for (var num = order.Count - 2; num >= 0; num--)
         {
-            var array2 = new float[Order[num].Count];
-            for (var k = 0; k < Order[num].Count; k++)
+            var array2 = new float[order[num].Count];
+            for (var k = 0; k < order[num].Count; k++)
             {
-                array2[k] = MedianValue(Order[num][k], Order[num + 1], false);
+                array2[k] = medianValue(order[num][k], order[num + 1], false);
             }
 
-            SortLayer(Order[num], [..array2]);
+            sortLayer(order[num], [..array2]);
         }
     }
 
-    protected float MedianValue(ResearchProjectDef vertex, List<ResearchProjectDef> adjacentLayer, bool toTheLeft)
+    private float medianValue(ResearchProjectDef vertex, List<ResearchProjectDef> adjacentLayer, bool toTheLeft)
     {
         var array = !toTheLeft
-            ? AdjacentPositionsToTheRight(vertex, adjacentLayer)
-            : AdjacentPositionsToTheLeft(vertex, adjacentLayer);
+            ? adjacentPositionsToTheRight(vertex, adjacentLayer)
+            : adjacentPositionsToTheLeft(vertex, adjacentLayer);
         var num = array.Length;
         var num2 = num / 2;
         if (num == 0)
@@ -355,7 +352,7 @@ public class OrganizedResearch : MainTabWindow_Research
         return ((array[num2 - 1] * num4) + (array[num2] * num3)) / (num3 + num4);
     }
 
-    protected int[] AdjacentPositionsToTheLeft(ResearchProjectDef vertex, List<ResearchProjectDef> adjacentLayer)
+    private static int[] adjacentPositionsToTheLeft(ResearchProjectDef vertex, List<ResearchProjectDef> adjacentLayer)
     {
         var list = new List<int>();
         for (var i = 0; i < adjacentLayer.Count; i++)
@@ -375,7 +372,7 @@ public class OrganizedResearch : MainTabWindow_Research
         return list.ToArray();
     }
 
-    protected int[] AdjacentPositionsToTheRight(ResearchProjectDef vertex, List<ResearchProjectDef> adjacentLayer)
+    private static int[] adjacentPositionsToTheRight(ResearchProjectDef vertex, List<ResearchProjectDef> adjacentLayer)
     {
         var list = new List<int>();
         for (var i = 0; i < adjacentLayer.Count; i++)
@@ -395,9 +392,9 @@ public class OrganizedResearch : MainTabWindow_Research
         return list.ToArray();
     }
 
-    protected void SortLayer(List<ResearchProjectDef> Order, List<float> median)
+    private static void sortLayer(List<ResearchProjectDef> order, List<float> median)
     {
-        for (var i = 0; i < Order.Count; i++)
+        for (var i = 0; i < order.Count; i++)
         {
             var index = i;
             if (median[i] == -1f)
@@ -405,7 +402,7 @@ public class OrganizedResearch : MainTabWindow_Research
                 continue;
             }
 
-            for (var j = i + 1; j < Order.Count; j++)
+            for (var j = i + 1; j < order.Count; j++)
             {
                 if (median[j] >= 0f && median[j] < median[index])
                 {
@@ -416,49 +413,49 @@ public class OrganizedResearch : MainTabWindow_Research
             var item = median[index];
             median.RemoveAt(index);
             median.Insert(i, item);
-            var item2 = Order[index];
-            Order.RemoveAt(index);
-            Order.Insert(i, item2);
+            var item2 = order[index];
+            order.RemoveAt(index);
+            order.Insert(i, item2);
         }
     }
 
-    protected void Transpose(List<List<ResearchProjectDef>> Order)
+    private void transpose(List<List<ResearchProjectDef>> order)
     {
         var continueIteration = true;
         while (continueIteration)
         {
             continueIteration = false;
-            for (var i = 1; i < Order.Count; i++)
+            for (var i = 1; i < order.Count; i++)
             {
-                for (var j = 0; j < Order[i].Count - 1; j++)
+                for (var j = 0; j < order[i].Count - 1; j++)
                 {
-                    var num = CountCrossingsBetweenLayers(Order[i - 1], Order[i]);
-                    SwapInList(Order[i], j, j + 1);
-                    if (num > CountCrossingsBetweenLayers(Order[i - 1], Order[i]))
+                    var num = countCrossingsBetweenLayers(order[i - 1], order[i]);
+                    swapInList(order[i], j, j + 1);
+                    if (num > countCrossingsBetweenLayers(order[i - 1], order[i]))
                     {
                         continueIteration = true;
                     }
                     else
                     {
-                        SwapInList(Order[i], j, j + 1);
+                        swapInList(order[i], j, j + 1);
                     }
                 }
             }
         }
     }
 
-    protected int CountTotalCrossings(List<List<ResearchProjectDef>> Order)
+    private int countTotalCrossings(List<List<ResearchProjectDef>> order)
     {
         var num = 0;
-        for (var i = 0; i < Order.Count - 1; i++)
+        for (var i = 0; i < order.Count - 1; i++)
         {
-            num += CountCrossingsBetweenLayers(Order[i], Order[i + 1]);
+            num += countCrossingsBetweenLayers(order[i], order[i + 1]);
         }
 
         return num;
     }
 
-    protected int CountCrossingsBetweenLayers(List<ResearchProjectDef> layerA, List<ResearchProjectDef> layerB)
+    private int countCrossingsBetweenLayers(List<ResearchProjectDef> layerA, List<ResearchProjectDef> layerB)
     {
         var num = 0;
         layerB.Reverse();
@@ -468,7 +465,7 @@ public class OrganizedResearch : MainTabWindow_Research
             {
                 if (layerA[i].requiredByThis?.Contains(layerB[j]) ?? false)
                 {
-                    num += CountEdgesInRange(layerA, layerB, i - 1, j - 1);
+                    num += countEdgesInRange(layerA, layerB, i - 1, j - 1);
                 }
             }
         }
@@ -477,19 +474,19 @@ public class OrganizedResearch : MainTabWindow_Research
         return num;
     }
 
-    protected int CountEdgesInRange(List<ResearchProjectDef> layerA, List<ResearchProjectDef> layerB,
-        int layerAindex, int layerBindex)
+    private static int countEdgesInRange(List<ResearchProjectDef> layerA, List<ResearchProjectDef> layerB,
+        int layerIndexA, int layerIndexB)
     {
         var num = 0;
-        if (layerAindex < 0 || layerBindex < 0)
+        if (layerIndexA < 0 || layerIndexB < 0)
         {
             return 0;
         }
 
-        num += CountEdgesInRange(layerA, layerB, layerAindex, layerBindex - 1);
-        num += CountEdgesInRange(layerA, layerB, layerAindex - 1, layerBindex);
-        num -= CountEdgesInRange(layerA, layerB, layerAindex - 1, layerBindex - 1);
-        if (layerA[layerAindex].requiredByThis?.Contains(layerB[layerBindex]) ?? false)
+        num += countEdgesInRange(layerA, layerB, layerIndexA, layerIndexB - 1);
+        num += countEdgesInRange(layerA, layerB, layerIndexA - 1, layerIndexB);
+        num -= countEdgesInRange(layerA, layerB, layerIndexA - 1, layerIndexB - 1);
+        if (layerA[layerIndexA].requiredByThis?.Contains(layerB[layerIndexB]) ?? false)
         {
             num++;
         }
@@ -497,51 +494,8 @@ public class OrganizedResearch : MainTabWindow_Research
         return num;
     }
 
-    private void SwapInList<T>(List<T> list, int indexA, int indexB)
+    private static void swapInList<T>(List<T> list, int indexA, int indexB)
     {
         (list[indexA], list[indexB]) = (list[indexB], list[indexA]);
-    }
-
-    private void PrintList(List<ResearchProjectDef> list)
-    {
-        foreach (var item in list)
-        {
-            Log.Message(item.defName);
-        }
-    }
-
-    private void PrintTopologicalOrdering(List<ResearchProjectDef> list)
-    {
-        foreach (var item in list)
-        {
-            Log.Message(item.defName);
-            IEnumerable<ResearchProjectDef> prerequisites = item.prerequisites;
-            foreach (var item2 in prerequisites ?? Enumerable.Empty<ResearchProjectDef>())
-            {
-                Log.Message($"   |- {item2.defName}");
-            }
-
-            Log.Message("");
-        }
-    }
-
-    private void PrintLayerAndTightEdges(List<ResearchProjectDef> Layer, List<ResearchProjectDef> nextLayer,
-        int index)
-    {
-        Log.Message($"Layer {index}");
-        for (var i = 0; i < Layer.Count - 1; i++)
-        {
-            Log.Message(Layer[i].defName);
-            IEnumerable<ResearchProjectDef> requiredByThis = Layer[i].requiredByThis;
-            foreach (var item in requiredByThis ?? Enumerable.Empty<ResearchProjectDef>())
-            {
-                if (nextLayer.Contains(item))
-                {
-                    Log.Message($"   |- {item.defName}");
-                }
-            }
-
-            Log.Message("");
-        }
     }
 }
